@@ -4,13 +4,7 @@ Este projeto contém uma suíte de testes automatizados da API ServeRest, desenv
 
 A ServeRest é uma API REST gratuita que simula um ambiente de e-commerce e foi criada para fins educacionais, sendo amplamente utilizada para estudos e práticas de testes de software.
 
-💙 Gostou da iniciativa? Considere apoiar o projeto original:
-Autor: <https://github.com/PauloGoncalvesBH>
-Repositório oficial: <https://github.com/ServeRest/ServeRest>
-Documentação Swagger: <https://serverest.dev/swagger?lang=pt-BR>
-
 📋 Sobre este projeto
-
 As regras funcionais e critérios de aceite utilizados na automação podem ser consultados em: ./docs/api/regras-funcionais-e-criterios-de-aceite.md
 
 📌 Pré-requisitos
