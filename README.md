@@ -68,10 +68,21 @@ Com a API local em execução e acesso à internet, rode `npm.cmd run cy:run:fro
 - A exclusão verifica o bloqueio da API e a permanência do produto no estoque. O teste ainda falha na última asserção: a interface atual não exibe a mensagem de bloqueio retornada pela API.
 - A reserva de estoque adiciona duas unidades pela interface e verifica na API se o carrinho ativo do cliente contém as duas unidades e se o estoque caiu de 10 para 8. A interface pública atual não persiste o carrinho na API, então o cenário falha antes da verificação de estoque. A reserva via API é verificada no CT13.1.
 
+## Integração contínua
+
+O workflow [Testes ServeRest](./.github/workflows/testes.yml) roda a cada pull request ou manualmente pela aba **Actions**. Cada job instala as dependências com `npm ci` e aguarda a própria instância local do ServeRest responder antes de executar os testes.
+
+- **API:** executa a suíte completa. Falhas deixam o job vermelho.
+- **Regressão de frontend:** executa os cenários sem `@fail`. Falhas deixam o job vermelho.
+- **Falhas conhecidas de frontend:** executa apenas os cenários `@fail` (mensagem de exclusão bloqueada e reserva de carrinho). O resultado dos testes não bloqueia a regressão; as asserções continuam sendo executadas.
+
+Na página da execução em **Actions**, baixe os artefatos `resultados-*` para consultar o JSON de cada job e `relatorio-html-api` para visualizar o relatório da API. Os relatórios disponíveis são publicados mesmo quando os testes falham.
+
 ## Organização
 
 - [Features de API](./cypress/e2e/features/api): cenários de login, usuários, produtos e carrinhos.
 - [Steps de API](./cypress/e2e/step_definitions/api): requisições e asserções por domínio.
 - [Suporte de API](./cypress/support/api.js): dados de teste, autenticação e limpeza dos registros criados pela suíte.
+- [Page Object da Lista de Compras](./cypress/support/frontend.js): concentra os seletores e as ações da interface; a sequência e as asserções ficam nos steps.
 
 Os cenários usam o ServeRest real. A suíte cria seus próprios dados de teste, sem fixtures, mocks ou dependência de IDs cadastrados previamente.

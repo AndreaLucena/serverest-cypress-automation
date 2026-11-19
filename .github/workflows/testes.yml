@@ -1,0 +1,96 @@
+name: Testes ServeRest
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  testes:
+    name: ${{ matrix.suite }}
+    runs-on: windows-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - suite: api
+            report: cypress/reports/cucumber-report.json
+          - suite: frontend-regressao
+            tags: 'not @fail'
+            report: cypress/reports/frontend/cucumber-report.json
+          - suite: frontend-falhas-conhecidas
+            tags: '@fail'
+            report: cypress/reports/frontend/cucumber-report.json
+    env:
+      SERVEREST_URL: http://127.0.0.1:3000
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '26'
+          cache: npm
+
+      - name: Instalar dependências
+        run: npm.cmd ci
+
+      - name: Iniciar ServeRest local
+        id: serverest
+        run: |
+          $stdout = Join-Path $env:RUNNER_TEMP 'serverest.log'
+          $stderr = Join-Path $env:RUNNER_TEMP 'serverest-errors.log'
+          $server = Start-Process node -ArgumentList '.\node_modules\serverest\src\server.js --nodoc --porta 3000' -RedirectStandardOutput $stdout -RedirectStandardError $stderr -PassThru
+          "pid=$($server.Id)" >> $env:GITHUB_OUTPUT
+
+          for ($attempt = 0; $attempt -lt 30; $attempt++) {
+            if ($server.HasExited) { break }
+            curl.exe --max-time 2 --fail --silent "$env:SERVEREST_URL/swagger.json" --output NUL
+            if ($LASTEXITCODE -eq 0) { exit 0 }
+            Start-Sleep -Seconds 1
+          }
+
+          Get-Content -LiteralPath $stdout, $stderr
+          throw 'ServeRest não ficou disponível para os testes.'
+
+      - name: Executar testes de API
+        if: matrix.suite == 'api'
+        run: npm.cmd run cy:run:api
+
+      - name: Executar testes de frontend
+        if: matrix.suite != 'api'
+        continue-on-error: ${{ matrix.suite == 'frontend-falhas-conhecidas' }}
+        env:
+          CUCUMBER_TAGS: ${{ matrix.tags }}
+        run: npm.cmd run cy:run:frontend -- --expose "tags=$env:CUCUMBER_TAGS,jsonOutput=cypress/reports/frontend/cucumber-report.json"
+
+      - name: Gerar relatório HTML da API
+        if: ${{ !cancelled() && matrix.suite == 'api' && hashFiles(matrix.report) != '' }}
+        run: npm.cmd run report
+
+      - name: Publicar resultados
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: resultados-${{ matrix.suite }}
+          if-no-files-found: error
+          path: ${{ matrix.report }}
+
+      - name: Publicar relatório HTML da API
+        if: ${{ !cancelled() && matrix.suite == 'api' && hashFiles('cypress/reports/html/index.html') != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: relatorio-html-api
+          path: cypress/reports/html/
+
+      - name: Encerrar ServeRest
+        if: ${{ always() && steps.serverest.outputs.pid != '' }}
+        env:
+          SERVEREST_PID: ${{ steps.serverest.outputs.pid }}
+        run: |
+          $server = Get-Process -Id ([int]$env:SERVEREST_PID) -ErrorAction SilentlyContinue
+          if ($server) { Stop-Process -Id $server.Id }

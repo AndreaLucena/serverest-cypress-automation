@@ -7,6 +7,7 @@ Feature: Cadastro de produtos e gestão de estoque nas compras com carrinho
     When o administrador cadastra "Produto Teste" com descrição "Produto para teste", preço 150 e quantidade 10
     Then a lista de estoque exibe "Produto Teste" com preço 150 e quantidade 10
 
+  @fail
   Scenario: O administrador não pode excluir um produto que está no carrinho de um cliente
     Given que o administrador está autenticado
     And um cliente tem "Produto Teste" em seu carrinho ativo
@@ -14,7 +15,7 @@ Feature: Cadastro de produtos e gestão de estoque nas compras com carrinho
     Then "Produto Teste" permanece na lista de estoque
     And é exibida mensagem de que não é permitido excluir um produto que faz parte de um carrinho
 
-  @reserva-estoque
+  @reserva-estoque @fail
   Scenario: Cliente inclui produtos no carrinho e o estoque é atualizado
     Given que o cliente está autenticado
     And existe um produto chamado "Produto Teste" no estoque com 10 unidades

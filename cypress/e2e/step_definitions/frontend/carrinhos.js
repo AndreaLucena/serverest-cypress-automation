@@ -1,16 +1,23 @@
 import { Given, When, Then } from "@badeball/cypress-cucumber-preprocessor";
 import { authenticate, createCart, createProduct, list, read, state, unique } from "../../../support/api";
+import { shoppingListPage, testIdSelector } from "../../../support/frontend";
 
 const frontend = "https://front.serverest.dev";
 const api = "https://serverest.dev";
 const blockedMessage = "Não é permitido excluir produto que faz parte de carrinho";
-const testId = (id) => cy.get(`[data-testid="${id}"]`);
+const testId = (id) => cy.get(testIdSelector(id));
 const productName = (name) => {
   state.productNames ??= new Map();
   if (!state.productNames.has(name)) state.productNames.set(name, `${name} ${unique()}`);
   return state.productNames.get(name);
 };
 const rowFor = (name) => cy.contains("tbody td:first-child", productName(name)).closest("tr");
+
+function stockProductFor(name) {
+  const product = state.stockProduct;
+  expect(product.nome, "produto preparado para a reserva").to.eq(productName(name));
+  return product;
+}
 
 function loginThroughFrontend(admin) {
   const backend = new URL(Cypress.config("baseUrl"));
@@ -33,7 +40,6 @@ function loginThroughFrontend(admin) {
 }
 
 Given("que o administrador está autenticado", () => loginThroughFrontend(true));
-Given("que o cliente está autenticado", () => loginThroughFrontend(false));
 
 Given("não existe um produto chamado {string} no catálogo", (name) => {
   return list("produtos", { nome: productName(name) }).then((products) => {
@@ -86,6 +92,8 @@ Then("é exibida mensagem de que não é permitido excluir um produto que faz pa
   cy.contains(blockedMessage).should("be.visible");
 });
 
+Given("que o cliente está autenticado", () => loginThroughFrontend(false));
+
 Given("existe um produto chamado {string} no estoque com {int} unidades", (name, quantity) => {
   return createProduct({ nome: productName(name), quantidade: quantity }).then((product) => {
     state.stockProduct = product;
@@ -96,31 +104,29 @@ When("o cliente adiciona ao carrinho {int} unidades de {string}", (quantity, nam
   const product = productName(name);
   state.cleanup.carrinhos.push(state.customer.token);
   cy.reload();
-  cy.contains(".card-title", product).closest(".card").find('[data-testid="adicionarNaLista"]').click();
+  // O Page Object executa as ações na tela; o step mantém a sequência e a asserção de quantidade.
+  shoppingListPage.addProductFromCatalog(product);
   for (let count = 1; count < quantity; count++) {
-    cy.contains(".card", product).find('[data-testid="product-increase-quantity"]').click();
+    shoppingListPage.increaseQuantity(product);
   }
-  cy.contains('[data-testid="shopping-cart-product-name"]', product)
-    .closest(".card")
-    .find('[data-testid="shopping-cart-product-quantity"]')
-    .should("have.text", `Total: ${quantity}`);
-  cy.contains("button", "Adicionar no carrinho").click();
+  shoppingListPage.quantityLabel(product).should("have.text", `Total: ${quantity}`);
+  shoppingListPage.addToCart();
   return cy.location("pathname").should("eq", "/carrinho");
 });
 
 Then("um carrinho ativo contém {int} unidades de {string}", (quantity, name) => {
-  expect(state.stockProduct.nome).to.eq(productName(name));
+  const product = stockProductFor(name);
   return list("carrinhos", { idUsuario: state.customer.id }).then((carts) => {
     expect(carts, "carrinho ativo do cliente").to.have.length(1);
     expect(carts[0].produtos).to.deep.include({
-      idProduto: state.stockProduct._id,
+      idProduto: product._id,
       quantidade: quantity,
-      precoUnitario: state.stockProduct.preco,
+      precoUnitario: product.preco,
     });
   });
 });
 
 Then("o estoque exibe {int} unidades de {string}", (quantity, name) => {
-  expect(state.stockProduct.nome).to.eq(productName(name));
-  return read("produtos", state.stockProduct._id).its("quantidade").should("eq", quantity);
+  const product = stockProductFor(name);
+  return read("produtos", product._id).its("quantidade").should("eq", quantity);
 });
