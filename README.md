@@ -1,88 +1,255 @@
-# Rotas — automação de testes da API ServeRest
+🚀 Automação de Testes da API ServeRest
 
-Suíte de integração da [API ServeRest](https://serverest.dev/) com Cypress, JavaScript e Cucumber. Os cenários BDD cobrem login, usuários, produtos e carrinhos. A estrutura de features, steps e suporte segue como referência o projeto [CIandT](https://github.com/barbaraantonia/CIandT).
+Este projeto contém uma suíte de testes automatizados da API ServeRest, desenvolvida com Cypress, JavaScript e Cucumber (BDD).
 
-- [Regras funcionais e critérios de aceite do Rotas](./docs/api/regras-funcionais-e-criterios-de-aceite.md)
-- [Especificação OpenAPI do ServeRest](https://serverest.dev/swagger.json?lang=pt-BR)
+A ServeRest é uma API REST gratuita que simula um ambiente de e-commerce e foi criada para fins educacionais, sendo amplamente utilizada para estudos e práticas de testes de software.
 
-## Pré-requisitos
+💙 Gostou da iniciativa? Considere apoiar o projeto original:
 
-- Node.js 22, 24 ou 26, com npm.
-- Git para clonar o repositório.
+Autor: <https://github.com/PauloGoncalvesBH>
+Repositório oficial: <https://github.com/ServeRest/ServeRest>
+Documentação Swagger: <https://serverest.dev/swagger?lang=pt-BR>
 
-## Executar no Windows (PowerShell)
+📋 Sobre este projeto
 
-```powershell
+A suíte automatiza cenários de integração da API ServeRest e valida funcionalidades relacionadas a:
+
+- Autenticação
+- Usuários
+- Produtos
+- Carrinhos de compra
+
+Os testes são executados diretamente contra uma instância real da API, sem utilização de mocks ou fixtures.
+
+📖 Regras de negócio
+
+As regras funcionais e critérios de aceite utilizados na automação podem ser consultados em:
+[Regras funcionais e critérios de aceite do Rotas](./docs/api/regras-funcionais-e-criterios-de-aceite.md)
+
+📌 Pré-requisitos
+
+Antes de executar o projeto, certifique-se de possuir:
+- Node.js 22, 24 ou 26
+- npm
+- Git
+
+
+▶️ Execução local (Windows / PowerShell)
+1. Clonar o repositório:
 git clone https://github.com/AndreaLucena/serverest-cypress-automation.git
 Set-Location .\serverest-cypress-automation
+2. Instalar as dependências:
 npm.cmd ci
+3. Iniciar o ServeRest local:
 npm.cmd run serverest:local
-```
+⚠️ Mantenha o ServeRest em execução durante toda a execução da suíte.
 
-Mantenha o ServeRest em execução. Em outro terminal, na raiz do repositório, execute:
+4. Executar os testes de API
 
-```powershell
+Abra um novo terminal na raiz do projeto e execute:
 npm.cmd run cy:run:api
 npm.cmd run report
-```
 
-### Abrir e interpretar o relatório HTML
+📊 Relatórios
 
-Abra o [index.html](./cypress/reports/html/index.html) **no navegador**, não como código no VS Code. No PowerShell, a partir da pasta `serverest-cypress-automation`, rode:
-
-```powershell
+Após a execução dos testes, um relatório HTML será gerado.
+Abrir o relatório:
 Start-Process '.\cypress\reports\html\index.html'
-```
+⚠️ Abra o arquivo no navegador. A visualização do código-fonte no VS Code não exibe o relatório corretamente.
 
-O Cucumber grava o resultado dos testes de API em `cypress\reports\cucumber-report.json`. Depois de uma nova execução, rode `npm.cmd run report` novamente, mesmo se algum cenário falhar, e atualize a página no navegador. Se o `index.html` ainda não existir, execute primeiro a suíte de API e depois gere o relatório.
+Como interpretar o relatório
 
-1. No resumo, confira quantos cenários passaram, falharam ou ficaram pendentes.
-2. Use **Search features...** para encontrar uma funcionalidade, como **Gerenciamento de Carrinhos de Compra**, e clique no nome para abrir os detalhes.
-3. Expanda um cenário para ver os passos `Given`, `When`, `Then` e `And`, com seus resultados e durações. Em caso de falha, comece pela primeira mensagem de erro: os passos seguintes podem não ter sido executados.
+O relatório permite:
 
-Passos ambíguos ou sem definição aparecem como falhas no HTML, sem alterar o resultado original no JSON.
+✅ Consultar cenários aprovados, falhos e pendentes
 
-No topo do relatório, **NPM Version** mostra a versão retornada por `npm -v` no momento da geração.
+✅ Pesquisar funcionalidades específicas utilizando o campo Search features...
 
-Para investigar falhas, consulte [relatórios](./cypress/reports), [capturas de tela](./cypress/screenshots), [vídeos](./cypress/videos) (quando a gravação estiver habilitada) e [downloads](./cypress/downloads) (quando houver). Apenas os arquivos `.gitkeep` são versionados nessas pastas; os artefatos gerados ficam locais.
+✅ Visualizar detalhes de cada cenário
 
-### Outras opções de execução
+✅ Analisar os passos Given, When, Then e And
 
-Para abrir a interface do Cypress, use `npm.cmd run cy:open`. Mantenha o [lockfile](./package-lock.json) versionado para que `npm.cmd ci` reproduza a instalação.
+✅ Consultar tempos de execução e mensagens de erro
 
-A suíte usa `http://127.0.0.1:3000` por padrão. Se a porta estiver ocupada, passe outra ao iniciar o servidor (por exemplo, `npm.cmd run serverest:local -- --porta 3317`) e defina `$env:SERVEREST_URL = 'http://127.0.0.1:3317'` no terminal do Cypress. Use uma instância dedicada a testes.
+Exemplo de análise:
+1. Consulte o resumo geral para identificar quantos cenários foram executados.
+2. Utilize o campo Search features... para localizar uma funcionalidade específica, como Gerenciamento de Carrinhos de Compra.
+3. Clique na funcionalidade desejada para expandir seus cenários.
+4. Abra um cenário para visualizar:
+  . Passos executados
+  . Resultado de cada passo
+  . Duração da execução
+  . Mensagens de erro, quando houver
 
-Para executar apenas a feature de login em modo headless:
+💡 Em caso de falha, analise primeiro a primeira mensagem de erro. Os passos posteriores podem não ter sido executados.
 
-```powershell
+Gerando novamente o relatório
+O Cucumber salva os resultados em:
+cypress/reports/cucumber-report.json
+
+Após uma nova execução dos testes, gere novamente o relatório:
+npm.cmd run report
+Mesmo que existam falhas na execução, o comando de geração do relatório deve ser executado.
+Se o arquivo HTML ainda não existir, execute primeiro a suíte de testes e somente depois gere o relatório.
+
+Informações adicionais do relatório
+Passos ambíguos ou sem implementação aparecem como falhas no HTML.
+O resultado original do JSON permanece inalterado.
+O campo NPM Version exibe a versão retornada pelo comando:
+npm -v
+
+🔍 Artefatos para análise de falhas
+
+Para investigação de problemas, consulte os seguintes diretórios:
+
+Tipo	Diretório
+Relatórios	cypress/reports
+Capturas de tela	cypress/screenshots
+Vídeos	cypress/videos
+Downloads	cypress/downloads
+
+Apenas os arquivos .gitkeep são versionados. Os artefatos gerados durante os testes permanecem apenas no ambiente local.
+
+⚙️ Outras opções de execução
+Abrir a interface do Cypress
+npm.cmd run cy:open
+Executar apenas a feature de Login:
 npm.cmd run cy:run -- --spec "cypress/e2e/features/api/login.feature"
-```
 
-No Bash ou em outro shell Unix, use `npm` em vez de `npm.cmd` e `cd` em vez de `Set-Location`. Se precisar trocar a porta, exporte `SERVEREST_URL` no terminal de testes.
+Instalação reproduzível
+Mantenha o arquivo abaixo versionado no repositório:
+package-lock.json
 
-## Testes de frontend
+Isso garante que o comando:
+PowerShell
+npm.cmd ci
+reproduza exatamente as versões utilizadas pela suíte.
 
-Com a API local em execução e acesso à internet, rode `npm.cmd run cy:run:frontend`. A suíte abre a [interface do ServeRest](https://front.serverest.dev/) e encaminha suas chamadas de API para a instância local. O relatório JSON de frontend fica em `cypress/reports/frontend/cucumber-report.json`, separado do relatório de API.
+🌐 Configuração da URL da API
 
-- O cadastro verifica os dados do produto na lista de estoque.
-- A exclusão verifica o bloqueio da API e a permanência do produto no estoque. O teste ainda falha na última asserção: a interface atual não exibe a mensagem de bloqueio retornada pela API.
-- A reserva de estoque confere duas unidades na Lista de Compras e verifica na API se existe um carrinho ativo vinculado ao cliente e se o estoque caiu de 10 para 8. A interface pública atual não persiste o carrinho na API, então o cenário falha antes da verificação de estoque. A reserva via API é verificada no CT13.1.
+Por padrão, a suíte utiliza:
+http://127.0.0.1:3000
 
-## Integração contínua
+Caso a porta esteja ocupada, inicie uma nova instância em outra porta:
+npm.cmd run serverest:local -- --porta 3317
 
-O workflow [Testes ServeRest](./.github/workflows/testes.yml) roda a cada pull request ou manualmente pela aba **Actions**. Cada job instala as dependências com `npm ci` e aguarda a própria instância local do ServeRest responder antes de executar os testes.
+Em seguida, configure a variável de ambiente:
+$env:SERVEREST_URL = 'http://127.0.0.1:3317'
 
-- **API:** executa a suíte completa. Falhas deixam o job vermelho.
-- **Regressão de frontend:** executa os cenários sem `@fail`. Falhas deixam o job vermelho.
-- **Falhas conhecidas de frontend:** executa apenas os cenários `@fail` (mensagem de exclusão bloqueada e reserva de carrinho). O resultado dos testes não bloqueia a regressão; as asserções continuam sendo executadas.
+Recomenda-se utilizar uma instância exclusiva para execução dos testes.
 
-Na página da execução em **Actions**, baixe os artefatos `resultados-*` para consultar o JSON de cada job e `relatorio-html-api` para visualizar o relatório da API. Os relatórios disponíveis são publicados mesmo quando os testes falham.
+🐧 Execução em Linux/macOS
+Substitua os comandos específicos do PowerShell pelos equivalentes do sistema:
+Windows	Linux/macOS
+npm.cmd	npm
+Set-Location	cd
+Caso seja necessário alterar a URL da API, exporte a variável SERVEREST_URL antes da execução dos testes.
 
-## Organização
+🖥️ Testes de Frontend
 
-- [Features de API](./cypress/e2e/features/api): cenários de login, usuários, produtos e carrinhos.
-- [Steps de API](./cypress/e2e/step_definitions/api): requisições e asserções por domínio.
-- [Suporte de API](./cypress/support/api.js): dados de teste, autenticação e limpeza dos registros criados pela suíte.
-- [Page Object da Lista de Compras](./cypress/support/frontend.js): concentra os seletores e as ações da interface; a sequência e as asserções ficam nos steps.
+Com a API local em execução e acesso à internet disponível, execute:
+npm.cmd run cy:run:frontend
+A suíte acessa:
+https://front.serverest.dev/
+e redireciona as chamadas da API para a instância local da ServeRest.
 
-Os cenários usam o ServeRest real. A suíte cria seus próprios dados de teste, sem fixtures, mocks ou dependência de IDs cadastrados previamente.
+Os resultados são armazenados em:
+cypress/reports/frontend/cucumber-report.json
+Esse relatório é mantido separado da suíte de API.
+
+Cenários implementados:
+
+1. Cadastro de produtos - Valida:
+- Dados cadastrados exibidos corretamente na lista de estoque.
+
+2. Exclusão de produtos - Valida:
+- Bloqueio da exclusão pela API;
+- Permanência do produto no estoque.
+⚠️ Atualmente, o cenário falha na última validação porque a interface pública não exibe a mensagem de bloqueio retornada pela API.
+
+3. Reserva de estoque - Valida:
+- Inclusão de duas unidades na Lista de Compras;
+- Existência de um carrinho ativo vinculado ao cliente;
+- Redução do estoque de 10 para 8 unidades.
+⚠️ Atualmente, o cenário falha antes da validação de estoque porque a interface pública não persiste o carrinho na API.
+A reserva realizada diretamente pela API é validada no caso de teste CT13.1.
+
+🔄 Integração Contínua
+O workflow:
+.github/workflows/testes.yml
+É executado:
+- A cada Pull Request;
+- Manualmente pela aba Actions do GitHub.
+
+Cada job:
+1. Instala as dependências com npm ci;
+2. Inicializa uma instância própria do ServeRest;
+3. Aguarda a API ficar disponível;
+4. Executa a suíte correspondente.
+
+Jobs disponíveis:
+
+✅ API
+Executa toda a suíte de testes de API.
+Falhas tornam o job vermelho.
+
+✅ Regressão de Frontend
+Executa apenas cenários sem a tag @fail.
+Falhas tornam o job vermelho.
+⚠️ Falhas Conhecidas de Frontend
+Executa exclusivamente os cenários marcados com:
+@fail
+Inclui:
+- Mensagem de exclusão bloqueada;
+- Reserva de carrinho.
+As falhas não bloqueiam a regressão principal, mas continuam sendo verificadas e registradas.
+
+Artefatos publicados
+Na página da execução do workflow, na aba Actions, é possível baixar:
+- Resultados individuais:
+resultados-*
+Contêm os relatórios JSON gerados por cada job.
+
+- Relatório HTML da API:
+relatorio-html-api
+Permite visualizar os resultados em formato HTML.
+Os artefatos são publicados mesmo quando os testes apresentam falhas.
+
+📂 Organização do Projeto
+Features API
+cypress/e2e/features/api
+
+Contém os cenários de:
+- Login
+- Usuários
+- Produtos
+- Carrinhos
+
+Steps API
+cypress/e2e/step_definitions/api
+Implementa as requisições e validações de cada domínio da aplicação.
+
+Suporte API
+cypress/support/api.js
+Centraliza:
+- Dados de teste;
+- Autenticação;
+- Limpeza automática dos registros criados pela suíte.
+
+Page Object do Frontend
+cypress/support/frontend.js
+Concentra:
+- Seletores da interface;
+- Ações executadas pelo usuário.
+As regras de negócio e validações permanecem nos arquivos de step definitions.
+
+✅ Estratégia de Testes
+Os cenários são executados contra uma instância real do ServeRest.
+
+A suíte:
+- Cria seus próprios dados de teste;
+- Não utiliza fixtures;
+- Não utiliza mocks;
+- Não depende de IDs previamente cadastrados;
+- Realiza limpeza dos dados gerados durante a execução.
+Isso torna os testes mais independentes, reproduzíveis e próximos do comportamento real da aplicação.
