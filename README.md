@@ -40,6 +40,14 @@ npm.cmd run cy:run -- --spec "cypress/e2e/features/api/login.feature"
 
 No Bash ou em outro shell Unix, use `npm` em vez de `npm.cmd` e `cd` em vez de `Set-Location`. Se precisar trocar a porta, exporte `SERVEREST_URL` no terminal de testes.
 
+## Testes de frontend
+
+Com a API local em execução e acesso à internet, rode `npm.cmd run cy:run:frontend`. A suíte abre a [interface do ServeRest](https://front.serverest.dev/) e encaminha suas chamadas de API para a instância local. O relatório JSON de frontend fica em `cypress/reports/frontend/cucumber-report.json`, separado do relatório de API.
+
+- O cadastro verifica os dados do produto na lista de estoque.
+- A exclusão verifica o bloqueio da API e a permanência do produto no estoque. O teste ainda falha na última asserção: a interface atual não exibe a mensagem de bloqueio retornada pela API.
+- A reserva de estoque adiciona duas unidades pela interface e verifica na API se o carrinho ativo do cliente contém as duas unidades e se o estoque caiu de 10 para 8. A interface pública atual não persiste o carrinho na API, então o cenário falha antes da verificação de estoque. A reserva via API é verificada no CT13.1.
+
 ## Organização
 
 - [Features de API](./cypress/e2e/features/api): cenários de login, usuários, produtos e carrinhos.
