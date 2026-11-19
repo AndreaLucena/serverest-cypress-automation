@@ -26,9 +26,29 @@ npm.cmd run cy:run:api
 npm.cmd run report
 ```
 
-Abra [o relatório HTML](./cypress/reports/html/index.html). O Cucumber grava o JSON em `cypress\reports\cucumber-report.json`; execute `npm.cmd run report` depois da suíte mesmo se algum cenário falhar para inspecionar os resultados. Para abrir a interface do Cypress, use `npm.cmd run cy:open`.
+### Abrir e interpretar o relatório HTML
 
-Para investigar falhas, consulte [relatórios](./cypress/reports), [capturas de tela](./cypress/screenshots), [vídeos](./cypress/videos) (quando a gravação estiver habilitada) e [downloads](./cypress/downloads) (quando houver). Apenas os arquivos `.gitkeep` são versionados nessas pastas; os artefatos gerados ficam locais. Mantenha o [lockfile](./package-lock.json) versionado para que `npm.cmd ci` reproduza a instalação.
+Abra o [index.html](./cypress/reports/html/index.html) **no navegador**, não como código no VS Code. No PowerShell, a partir da pasta `serverest-cypress-automation`, rode:
+
+```powershell
+Start-Process '.\cypress\reports\html\index.html'
+```
+
+O Cucumber grava o resultado dos testes de API em `cypress\reports\cucumber-report.json`. Depois de uma nova execução, rode `npm.cmd run report` novamente, mesmo se algum cenário falhar, e atualize a página no navegador. Se o `index.html` ainda não existir, execute primeiro a suíte de API e depois gere o relatório.
+
+1. No resumo, confira quantos cenários passaram, falharam ou ficaram pendentes.
+2. Use **Search features...** para encontrar uma funcionalidade, como **Gerenciamento de Carrinhos de Compra**, e clique no nome para abrir os detalhes.
+3. Expanda um cenário para ver os passos `Given`, `When`, `Then` e `And`, com seus resultados e durações. Em caso de falha, comece pela primeira mensagem de erro: os passos seguintes podem não ter sido executados.
+
+Passos ambíguos ou sem definição aparecem como falhas no HTML, sem alterar o resultado original no JSON.
+
+No topo do relatório, **NPM Version** mostra a versão retornada por `npm -v` no momento da geração.
+
+Para investigar falhas, consulte [relatórios](./cypress/reports), [capturas de tela](./cypress/screenshots), [vídeos](./cypress/videos) (quando a gravação estiver habilitada) e [downloads](./cypress/downloads) (quando houver). Apenas os arquivos `.gitkeep` são versionados nessas pastas; os artefatos gerados ficam locais.
+
+### Outras opções de execução
+
+Para abrir a interface do Cypress, use `npm.cmd run cy:open`. Mantenha o [lockfile](./package-lock.json) versionado para que `npm.cmd ci` reproduza a instalação.
 
 A suíte usa `http://127.0.0.1:3000` por padrão. Se a porta estiver ocupada, passe outra ao iniciar o servidor (por exemplo, `npm.cmd run serverest:local -- --porta 3317`) e defina `$env:SERVEREST_URL = 'http://127.0.0.1:3317'` no terminal do Cypress. Use uma instância dedicada a testes.
 
