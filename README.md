@@ -28,8 +28,9 @@ Set-Location .\serverest-cypress-automation
 npm.cmd ci
 3. Iniciar o ServeRest local:
 npm.cmd run serverest:local
+
 ⚠️ Mantenha o ServeRest em execução durante toda a execução da suíte.
-4. Executar os testes de API
+5. Executar os testes de API
 Abra um novo terminal na raiz do projeto e execute:
 npm.cmd run cy:run:api
 npm.cmd run report
@@ -38,6 +39,7 @@ npm.cmd run report
 Após a execução dos testes, um relatório HTML será gerado.
 Abrir o relatório:
 Start-Process '.\cypress\reports\html\index.html'
+
 ⚠️ Abra o arquivo no navegador. A visualização do código-fonte no VS Code não exibe o relatório corretamente.
 
 Gerando novamente o relatório
@@ -107,6 +109,7 @@ Falhas tornam o job vermelho.
 ✅ Regressão de Frontend
 Executa apenas cenários sem a tag @fail.
 Falhas tornam o job vermelho.
+
 ⚠️ Falhas Conhecidas de Frontend
 Executa exclusivamente os cenários marcados com:
 @fail
@@ -126,14 +129,14 @@ relatorio-html-api
 Permite visualizar os resultados em formato HTML.
 Os artefatos são publicados mesmo quando os testes apresentam falhas.
 
-Suporte API
+🌐 Suporte API
 cypress/support/api.js
 Centraliza:
 - Dados de teste;
 - Autenticação;
 - Limpeza automática dos registros criados pela suíte.
 
-Page Object do Frontend
+🖥️ Page Object do Frontend
 cypress/support/frontend.js
 Concentra:
 - Seletores da interface;
