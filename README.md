@@ -66,7 +66,7 @@ Com a API local em execução e acesso à internet, rode `npm.cmd run cy:run:fro
 
 - O cadastro verifica os dados do produto na lista de estoque.
 - A exclusão verifica o bloqueio da API e a permanência do produto no estoque. O teste ainda falha na última asserção: a interface atual não exibe a mensagem de bloqueio retornada pela API.
-- A reserva de estoque adiciona duas unidades pela interface e verifica na API se o carrinho ativo do cliente contém as duas unidades e se o estoque caiu de 10 para 8. A interface pública atual não persiste o carrinho na API, então o cenário falha antes da verificação de estoque. A reserva via API é verificada no CT13.1.
+- A reserva de estoque confere duas unidades na Lista de Compras e verifica na API se existe um carrinho ativo vinculado ao cliente e se o estoque caiu de 10 para 8. A interface pública atual não persiste o carrinho na API, então o cenário falha antes da verificação de estoque. A reserva via API é verificada no CT13.1.
 
 ## Integração contínua
 

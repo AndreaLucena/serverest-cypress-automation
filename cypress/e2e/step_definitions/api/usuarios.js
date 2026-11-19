@@ -3,10 +3,22 @@ import { authenticate, checkFilter, checkList, createCart, createProduct, list, 
 
 const entity = "usuarios";
 const route = `/${entity}`;
-const save = (user) => { state.user = user; };
-const create = (overrides) => register(entity, userData(overrides)).then(save);
-const target = () => pathFor(entity, state.id ?? state.user._id);
-const compare = (user) => read(entity, user._id).then((body) => expect(body).to.deep.equal(user));
+const userPath = () => pathFor(entity, state.id ?? state.user._id);
+const registerUser = (overrides) => register(entity, userData(overrides));
+
+function prepareUser(overrides) {
+  return registerUser(overrides).then((user) => {
+    state.user = user;
+  });
+}
+
+function postUser(body) {
+  return send("POST", route, { body, track: entity });
+}
+
+function checkStoredUser(expected) {
+  return read(entity, expected._id).then((user) => expect(user).to.deep.equal(expected));
+}
 
 function checkEmailNotRegistered(email) {
   return list(entity, { email }).then((items) => expect(items).to.be.empty);
@@ -16,13 +28,13 @@ function checkPreparedUserInList() {
   expect(state.response.body[entity]).to.deep.include(state.user);
 }
 
-Given(/^que (?:existem usuários cadastrados|existe um usuário (?:cadastrado com (?:um identificador conhecido|dados conhecidos)|sem carrinho ativo))$/, () => create());
+Given(/^que (?:existem usuários cadastrados|existe um usuário (?:cadastrado com (?:um identificador conhecido|dados conhecidos)|sem carrinho ativo))$/, () => prepareUser());
 When(String.raw`o consumidor envia uma requisição GET para \/usuarios`, () => send("GET", route));
 Then("o corpo deve conter a quantidade de usuários retornados", () => checkList(entity));
 Then("a lista de usuários deve conter os usuários cadastrados", checkPreparedUserInList);
 
 Given("que existe um usuário cadastrado com o valor {string} no campo {string}", (value, field) => {
-  return create(field === "_id" ? {} : { [field]: value }).then(() => {
+  return prepareUser(field === "_id" ? undefined : { [field]: value }).then(() => {
     state.filter = String(state.user[field]);
   });
 });
@@ -47,19 +59,21 @@ Given("que o email {string} ainda não está cadastrado", (email) => {
 });
 When(String.raw`o consumidor envia uma requisição POST para \/usuarios com nome, email, password e administrador {string}`, (administrador) => {
   state.payload = userData({ email: state.email, administrador });
-  return send("POST", route, { body: state.payload, track: entity });
+  return postUser(state.payload);
 });
 Then("o usuário deve estar cadastrado com o perfil {string}", (administrador) =>
-  compare({ ...state.payload, administrador, _id: state.response.body._id }),
+  checkStoredUser({ ...state.payload, administrador, _id: state.response.body._id }),
 );
 
-Given("que existe um usuário cadastrado com o email {string}", (email) => create({ email }));
+Given("que existe um usuário cadastrado com o email {string}", (email) => prepareUser({ email }));
 When(String.raw`o consumidor envia uma requisição POST para \/usuarios com esse email`, () =>
-  send("POST", route, { body: userData({ email: state.user.email }), track: entity }),
+  postUser(userData({ email: state.user.email })),
 );
-Then("nenhum novo usuário deve ser cadastrado", () => list(entity, { email: state.user.email }).then((items) => expect(items).to.deep.equal([state.user])));
+Then("nenhum novo usuário deve ser cadastrado", () =>
+  list(entity, { email: state.user.email }).then((users) => expect(users).to.deep.equal([state.user])),
+);
 
-When(/^o consumidor envia uma requisição (GET|DELETE) para \/usuarios\/\{_id\} com (?:esse identificador|o identificador desse usuário)$/, (method) => send(method, target()));
+When(/^o consumidor envia uma requisição (GET|DELETE) para \/usuarios\/\{_id\} com (?:esse identificador|o identificador desse usuário)$/, (method) => send(method, userPath()));
 Then("o corpo deve conter os dados completos do usuário solicitado", () => expect(state.response.body).to.deep.equal(state.user));
 
 Given("que não existe usuário com o identificador informado", () => { state.id = unique().slice(0, 16); });
@@ -69,34 +83,42 @@ Then("o usuário não deve mais ser encontrado pelo identificador", () => read(e
 
 Given("que existe um usuário com um carrinho ativo vinculado", () => {
   return authenticate().then(({ user, token }) => {
-    save(user);
+    state.user = user;
     return createProduct().then((product) => createCart([{ idProduto: product._id, quantidade: 1 }], token));
   });
 });
 Then("a resposta deve indicar que o usuário não pode ser excluído enquanto possuir carrinho ativo", () => {
   expect(state.response.body.message).to.eq("Não é permitido excluir usuário com carrinho cadastrado");
 });
-Then("o usuário deve continuar cadastrado", () => compare(state.user));
+Then("o usuário deve continuar cadastrado", () => checkStoredUser(state.user));
 
 When(/^o consumidor envia uma requisição PUT para \/usuarios\/\{_id\} com novos dados válidos e um email exclusivo$/, () => {
   state.payload = userData({ nome: "Usuário Rotas atualizado", administrador: "true" });
-  return send("PUT", target(), { body: state.payload });
+  return send("PUT", userPath(), { body: state.payload });
 });
-Then("uma consulta pelo identificador deve retornar os novos dados do usuário", () => compare({ ...state.payload, _id: state.user._id }));
+Then("uma consulta pelo identificador deve retornar os novos dados do usuário", () =>
+  checkStoredUser({ ...state.payload, _id: state.user._id }),
+);
 
 Given("o email enviado ainda não está cadastrado", () => { state.payload = userData(); });
 When(/^o consumidor envia uma requisição PUT para \/usuarios\/\{_id\} com nome, email, password e administrador$/, () =>
-  send("PUT", target(), { body: state.payload, track: entity }),
+  send("PUT", userPath(), { body: state.payload, track: entity }),
 );
-Then("o usuário deve ser criado com o identificador retornado", () => compare({ ...state.payload, _id: state.response.body._id }));
+Then("o usuário deve ser criado com o identificador retornado", () =>
+  checkStoredUser({ ...state.payload, _id: state.response.body._id }),
+);
 
 Given("que existem dois usuários cadastrados com identificadores diferentes", () => {
-  return create().then(() => register(entity, userData())).then((other) => { state.other = other; });
+  return prepareUser().then(() => registerUser()).then((other) => {
+    state.other = other;
+  });
 });
 Given("o email de um usuário está em uso pelo outro", () => {
   expect(state.other.email).not.to.eq(state.user.email);
 });
 When("o consumidor atualiza um dos usuários usando o email já utilizado", () =>
-  send("PUT", target(), { body: userData({ email: state.other.email }), track: entity }),
+  send("PUT", userPath(), { body: userData({ email: state.other.email }), track: entity }),
 );
-Then("os dados dos usuários devem permanecer inalterados", () => compare(state.user).then(() => compare(state.other)));
+Then("os dados dos usuários devem permanecer inalterados", () =>
+  checkStoredUser(state.user).then(() => checkStoredUser(state.other)),
+);

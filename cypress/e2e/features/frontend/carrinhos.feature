@@ -16,9 +16,15 @@ Feature: Cadastro de produtos e gestão de estoque nas compras com carrinho
     And é exibida mensagem de que não é permitido excluir um produto que faz parte de um carrinho
 
   @reserva-estoque @fail
-  Scenario: Cliente inclui produtos no carrinho e o estoque é atualizado
+  Scenario: Ativar um carrinho vinculado ao cliente
     Given que o cliente está autenticado
     And existe um produto chamado "Produto Teste" no estoque com 10 unidades
     When o cliente adiciona ao carrinho 2 unidades de "Produto Teste"
-    Then um carrinho ativo contém 2 unidades de "Produto Teste"
-    And o estoque exibe 8 unidades de "Produto Teste"
+    Then um carrinho vinculado ao cliente é ativado
+
+  @reserva-estoque @fail
+  Scenario: Reduzir o estoque ao adicionar unidades ao carrinho
+    Given que o cliente está autenticado
+    And existe um produto chamado "Produto Teste" no estoque com 10 unidades
+    When o cliente adiciona ao carrinho 2 unidades de "Produto Teste"
+    Then o estoque exibe 8 unidades de "Produto Teste"

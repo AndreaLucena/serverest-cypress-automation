@@ -78,18 +78,20 @@ Feature: Gerenciamento de Produtos
   Scenario: CT10.2 - Impedir exclusão de produto vinculado a carrinho
     Given que o usuário está autenticado com perfil de administrador
     And existe um produto que faz parte de um carrinho
+    And os dados do produto são consultados antes da tentativa de exclusão
     When o usuário envia uma requisição DELETE para /produtos/{_id} com o identificador desse produto
     Then a resposta deve ter status 400
     And a mensagem deve ser "Não é permitido excluir produto que faz parte de carrinho"
-    And o produto deve continuar cadastrado
+    And a consulta pelo mesmo _id deve retornar o produto com nome, preco, descricao e quantidade inalterados
 
   Scenario: CT10.3 - Impedir exclusão por usuário sem perfil de administrador
     Given que o usuário está autenticado sem perfil de administrador
     And existe um produto que não está vinculado a carrinho ativo
+    And os dados do produto são consultados antes da tentativa de exclusão
     When o usuário envia uma requisição DELETE para /produtos/{_id} com o identificador desse produto
     Then a resposta deve ter status 403
     And a mensagem deve ser "Rota exclusiva para administradores"
-    And o produto deve continuar cadastrado
+    And a consulta pelo mesmo _id deve retornar o produto com nome, preco, descricao e quantidade inalterados
 
 # UC11 - Editar Produto (PUT /produtos/{_id})
   Scenario: CT11.1 - Atualizar produto existente

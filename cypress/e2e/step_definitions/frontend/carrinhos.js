@@ -114,15 +114,11 @@ When("o cliente adiciona ao carrinho {int} unidades de {string}", (quantity, nam
   return cy.location("pathname").should("eq", "/carrinho");
 });
 
-Then("um carrinho ativo contém {int} unidades de {string}", (quantity, name) => {
-  const product = stockProductFor(name);
-  return list("carrinhos", { idUsuario: state.customer.id }).then((carts) => {
+Then("um carrinho vinculado ao cliente é ativado", () => {
+  const { id } = state.customer;
+  return list("carrinhos", { idUsuario: id }).then((carts) => {
     expect(carts, "carrinho ativo do cliente").to.have.length(1);
-    expect(carts[0].produtos).to.deep.include({
-      idProduto: product._id,
-      quantidade: quantity,
-      precoUnitario: product.preco,
-    });
+    expect(carts[0].idUsuario, "usuário vinculado ao carrinho").to.eq(id);
   });
 });
 

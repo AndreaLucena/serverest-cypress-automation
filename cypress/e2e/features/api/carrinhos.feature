@@ -31,13 +31,17 @@ Feature: Gerenciamento de Carrinhos de Compra
 # UC13 - Cadastrar Carrinho (POST /carrinhos)
   Scenario: CT13.1 - Cadastrar carrinho e reservar estoque dos produtos
     Given que o usuário está autenticado
-    And existem produtos disponíveis com preços e estoques conhecidos
+    And existem produtos com os seguintes preços, estoques e quantidades solicitadas
+      | produto   | preço unitário | estoque inicial | quantidade solicitada |
+      | Produto A | 125            | 10              | 2                     |
+      | Produto B | 90             | 8               | 3                     |
     When o usuário envia uma requisição POST para /carrinhos com os produtos e suas quantidades
     Then a resposta deve ter status 201
     And a mensagem deve ser "Cadastro realizado com sucesso"
     And o carrinho deve conter os produtos e quantidades solicitados
     And os totais de preço e quantidade devem ser calculados corretamente
-    And o estoque de cada produto deve ser reduzido pela quantidade adicionada
+    And a consulta de estoque retorna 8 unidades de "Produto A"
+    And a consulta de estoque retorna 5 unidades de "Produto B"
 
   Scenario: CT13.2 - Impedir cadastro de carrinho sem autenticação
     Given que o usuário não está autenticado
@@ -48,12 +52,14 @@ Feature: Gerenciamento de Carrinhos de Compra
 
   Scenario: CT13.3 - Impedir reserva acima do estoque disponível
     Given que o usuário está autenticado
-    And existe um produto com estoque menor que a quantidade solicitada
+    And existem produtos com os seguintes preços, estoques e quantidades solicitadas
+      | produto   | preço unitário | estoque inicial | quantidade solicitada |
+      | Produto A | 125            | 2               | 3                     |
     When é enviada uma requisição POST para /carrinhos com esse produto
     Then a resposta deve ter status 400
     And a mensagem deve ser "Produto não possui quantidade suficiente"
     And o carrinho não deve ser criado
-    And o estoque do produto deve permanecer inalterado
+    And a consulta de estoque retorna 2 unidades de "Produto A"
 
 # UC14 - Buscar Carrinho por ID (GET /carrinhos/{_id})
   Scenario: CT14.1 - Buscar carrinho existente pelo identificador
@@ -70,13 +76,18 @@ Feature: Gerenciamento de Carrinhos de Compra
 
 # UC15 - Concluir Compra (DELETE /carrinhos/concluir-compra)
   Scenario: CT15.1 - Concluir compra e manter a baixa de estoque
-    Given que o usuário está autenticado e possui um carrinho ativo
-    And o estoque já foi reduzido ao reservar os produtos do carrinho
+    Given que o usuário está autenticado e possui um carrinho ativo com as seguintes reservas
+      | produto   | preço unitário | estoque inicial | quantidade solicitada |
+      | Produto A | 125            | 10              | 2                     |
+      | Produto B | 90             | 8               | 3                     |
+    And a consulta de estoque retorna 8 unidades de "Produto A"
+    And a consulta de estoque retorna 5 unidades de "Produto B"
     When é enviada uma requisição DELETE para /carrinhos/concluir-compra
     Then a resposta deve ter status 200
     And a mensagem deve ser "Registro excluído com sucesso"
     And o carrinho associado ao usuário deve ser removido
-    And o estoque dos produtos não deve ser restituído
+    And a consulta de estoque retorna 8 unidades de "Produto A"
+    And a consulta de estoque retorna 5 unidades de "Produto B"
 
   Scenario: CT15.2 - Impedir conclusão de compra sem carrinho ativo
     Given que o usuário está autenticado e não possui carrinho ativo
@@ -86,13 +97,18 @@ Feature: Gerenciamento de Carrinhos de Compra
 
 # UC16 - Cancelar Compra (DELETE /carrinhos/cancelar-compra)
   Scenario: CT16.1 - Cancelar compra e restituir todo o estoque reservado
-    Given que o usuário está autenticado e possui um carrinho ativo
-    And o carrinho reservou quantidades conhecidas de produtos
+    Given que o usuário está autenticado e possui um carrinho ativo com as seguintes reservas
+      | produto   | preço unitário | estoque inicial | quantidade solicitada |
+      | Produto A | 125            | 10              | 2                     |
+      | Produto B | 90             | 8               | 3                     |
+    And a consulta de estoque retorna 8 unidades de "Produto A"
+    And a consulta de estoque retorna 5 unidades de "Produto B"
     When é enviada uma requisição DELETE para /carrinhos/cancelar-compra
     Then a resposta deve ter status 200
     And a mensagem deve ser "Registro excluído com sucesso. Estoque dos produtos reabastecido"
     And o carrinho associado ao usuário deve ser removido
-    And as quantidades reservadas devem retornar integralmente ao estoque
+    And a consulta de estoque retorna 10 unidades de "Produto A"
+    And a consulta de estoque retorna 8 unidades de "Produto B"
 
   Scenario: CT16.2 - Impedir cancelamento de compra sem carrinho ativo
     Given que o usuário está autenticado e não possui carrinho ativo

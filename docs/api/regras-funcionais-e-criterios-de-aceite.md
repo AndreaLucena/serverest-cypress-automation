@@ -113,8 +113,8 @@ Cenários: [produtos.feature](../../cypress/e2e/features/api/produtos.feature).
 | CT | Critério de aceite |
 | --- | --- |
 | CT10.1 | Um administrador exclui um produto sem carrinho vinculado; recebe `200` e `Registro excluído com sucesso`, e a consulta posterior não encontra o produto. |
-| CT10.2 | Um produto vinculado a carrinho permanece cadastrado; a resposta é `400` com `Não é permitido excluir produto que faz parte de carrinho`. |
-| CT10.3 | Um token válido de usuário comum retorna `403` e `Rota exclusiva para administradores`; o produto permanece cadastrado. |
+| CT10.2 | A tentativa de excluir um produto vinculado a carrinho retorna `400` com `Não é permitido excluir produto que faz parte de carrinho`. A consulta pelo mesmo `_id` retorna `nome`, `preco`, `descricao` e `quantidade` iguais aos consultados após a reserva e antes da tentativa. |
+| CT10.3 | A tentativa de exclusão com token válido de usuário comum retorna `403` e `Rota exclusiva para administradores`. A consulta pelo mesmo `_id` retorna `nome`, `preco`, `descricao` e `quantidade` iguais aos consultados antes da tentativa. |
 
 ### UC11 — Editar produto · `PUT /produtos/{_id}`
 
@@ -147,9 +147,9 @@ Cenários: [carrinhos.feature](../../cypress/e2e/features/api/carrinhos.feature)
 
 | CT | Critério de aceite |
 | --- | --- |
-| CT13.1 | Com estoque suficiente, retorna `201`, `Cadastro realizado com sucesso` e o `_id`. A consulta confirma usuário, itens, preços unitários e quantidades solicitadas. `quantidadeTotal` soma as unidades e `precoTotal` soma os subtotais (`precoUnitario × quantidade`). O estoque diminui pela quantidade reservada de cada produto. |
+| CT13.1 | Com estoque suficiente, retorna `201`, `Cadastro realizado com sucesso` e o `_id`. A consulta confirma usuário, itens, preços unitários e quantidades solicitadas. `quantidadeTotal` soma as unidades e `precoTotal` soma os subtotais (`precoUnitario × quantidade`). Ao reservar 2 unidades do Produto A e 3 do Produto B, seus saldos passam de 10 para 8 e de 8 para 5, respectivamente. |
 | CT13.2 | Sem token, retorna `401` com mensagem de autenticação e não cria o carrinho. |
-| CT13.3 | A quantidade solicitada acima do estoque retorna `400` e `Produto não possui quantidade suficiente`; o carrinho não é criado e o estoque não muda. |
+| CT13.3 | Solicitar 3 unidades de um produto com saldo de 2 retorna `400` e `Produto não possui quantidade suficiente`; o carrinho não é criado, e o saldo permanece em 2 unidades. |
 
 ### UC14 — Buscar carrinho · `GET /carrinhos/{_id}`
 
@@ -166,7 +166,7 @@ Cenários: [carrinhos.feature](../../cypress/e2e/features/api/carrinhos.feature)
 
 | CT | Critério de aceite |
 | --- | --- |
-| CT15.1 | Com carrinho ativo, retorna `200` e `Registro excluído com sucesso`; o carrinho deixa de ser encontrado e a dedução de estoque é mantida. |
+| CT15.1 | Com carrinho ativo, retorna `200` e `Registro excluído com sucesso`; o carrinho deixa de ser encontrado, e os saldos permanecem em 8 unidades do Produto A e 5 do Produto B, os mesmos valores após a reserva. |
 | CT15.2 | Sem carrinho ativo, a resposta segue a RF04. |
 
 ### UC16 — Cancelar compra · `DELETE /carrinhos/cancelar-compra`
@@ -175,5 +175,5 @@ Cenários: [carrinhos.feature](../../cypress/e2e/features/api/carrinhos.feature)
 
 | CT | Critério de aceite |
 | --- | --- |
-| CT16.1 | Com carrinho ativo, retorna `200` e `Registro excluído com sucesso. Estoque dos produtos reabastecido`; o carrinho deixa de ser encontrado e o estoque de cada produto volta ao valor anterior à reserva. |
+| CT16.1 | Com carrinho ativo, retorna `200` e `Registro excluído com sucesso. Estoque dos produtos reabastecido`; o carrinho deixa de ser encontrado, e os saldos retornam aos valores anteriores à reserva: de 8 para 10 unidades do Produto A e de 5 para 8 do Produto B. |
 | CT16.2 | Sem carrinho ativo, a resposta segue a RF04. |
