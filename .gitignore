@@ -4,11 +4,15 @@ node_modules/
 .cache/
 *.log
 
-# Artefatos gerados pelo Cypress
-cypress/reports/
-cypress/screenshots/
-cypress/videos/
-cypress/downloads/
+# Artefatos gerados pelo Cypress (versionar apenas os .gitkeep)
+/cypress/reports/*
+!/cypress/reports/.gitkeep
+/cypress/screenshots/*
+!/cypress/screenshots/.gitkeep
+/cypress/videos/*
+!/cypress/videos/.gitkeep
+/cypress/downloads/*
+!/cypress/downloads/.gitkeep
 
 # Configuracoes locais e segredos
 .env

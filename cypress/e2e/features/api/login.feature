@@ -1,5 +1,5 @@
 
-Feature: Login
+Feature: Autenticação de Usuários (Login)
 
 #UC01 - Autenticar Usuário (POST /login): O usuário (administrador ou comum) envia suas credenciais (email e password) para validar sua identidade e obter um token JWT temporário (Bearer, válido por 600 segundos) necessário para operar rotas protegidas.
 

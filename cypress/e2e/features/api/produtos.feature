@@ -1,4 +1,4 @@
-Feature: Produtos
+Feature: Gerenciamento de Produtos
 
 # UC07 - Listar Produtos (GET /produtos)
   Scenario: CT07.1 - Listar produtos disponíveis

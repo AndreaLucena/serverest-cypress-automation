@@ -1,4 +1,4 @@
-Feature: Carrinhos
+Feature: Gerenciamento de Carrinhos de Compra
 
 # UC12 - Listar Carrinhos (GET /carrinhos)
   Scenario: CT12.1 - Listar carrinhos ativos

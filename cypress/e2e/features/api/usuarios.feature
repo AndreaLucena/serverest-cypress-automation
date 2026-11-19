@@ -1,4 +1,4 @@
-Feature: Usuários
+Feature: Gerenciamento de Usuários
 
 # UC02 - Listar Usuários (GET /usuarios)
   Scenario: CT02.1 - Listar usuários cadastrados
