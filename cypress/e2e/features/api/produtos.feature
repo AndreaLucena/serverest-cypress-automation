@@ -107,7 +107,7 @@ Feature: Produtos
     When o usuário envia uma requisição PUT para /produtos/{_id} com nome, preco, descricao e quantidade
     Then a resposta deve ter status 201
     And a resposta deve indicar que o cadastro foi realizado com sucesso
-    And o produto deve ser criado com o identificador informado
+    And o produto deve ser criado com o identificador retornado
 
   Scenario: CT11.3 - Impedir atualização com nome já utilizado por outro produto
     Given que o usuário está autenticado com perfil de administrador

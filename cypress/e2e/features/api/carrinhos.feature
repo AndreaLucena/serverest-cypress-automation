@@ -90,7 +90,7 @@ Feature: Carrinhos
     And o carrinho reservou quantidades conhecidas de produtos
     When é enviada uma requisição DELETE para /carrinhos/cancelar-compra
     Then a resposta deve ter status 200
-    And a mensagem deve ser "Registro excluído com sucesso"
+    And a mensagem deve ser "Registro excluído com sucesso. Estoque dos produtos reabastecido"
     And o carrinho associado ao usuário deve ser removido
     And as quantidades reservadas devem retornar integralmente ao estoque
 

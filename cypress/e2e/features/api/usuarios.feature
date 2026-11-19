@@ -92,7 +92,7 @@ Feature: Usuários
     When o consumidor envia uma requisição PUT para /usuarios/{_id} com nome, email, password e administrador
     Then a resposta deve ter status code 201
     And a resposta deve indicar que o cadastro foi realizado com sucesso
-    And o usuário deve ser criado com o identificador informado
+    And o usuário deve ser criado com o identificador retornado
 
   Scenario: CT06.3 - Impedir atualização com email já utilizado por outro usuário
     Given que existem dois usuários cadastrados com identificadores diferentes

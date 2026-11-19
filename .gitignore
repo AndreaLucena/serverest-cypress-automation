@@ -1,7 +1,22 @@
+# Dependencias instaladas, cache e logs locais
 node_modules/
-cypress/reports/*
-!cypress/reports/.gitkeep
-cypress/screenshots/*
-!cypress/screenshots/.gitkeep
-cypress/videos/*
-!cypress/videos/.gitkeep
+.npm/
+.cache/
+*.log
+
+# Artefatos gerados pelo Cypress
+cypress/reports/
+cypress/screenshots/
+cypress/videos/
+cypress/downloads/
+
+# Configuracoes locais e segredos
+.env
+.env.*
+!.env.example
+/cypress.env.json
+
+# Metadados do sistema operacional
+Thumbs.db
+Desktop.ini
+.DS_Store
